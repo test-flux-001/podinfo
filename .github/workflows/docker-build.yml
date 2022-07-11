@@ -10,7 +10,7 @@ on:
 jobs:
   docker:
     env:
-      IMAGE: ghcr.io/kingdonb/podinfo
+      IMAGE: ghcr.io/priyanka-ravi/podinfo
     runs-on: ubuntu-latest
     steps:
       - name: Prepare
