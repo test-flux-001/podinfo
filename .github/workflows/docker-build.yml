@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - '*'
-    tags-ignore:
-      - 'release/*'
+    tags:
+      - '*'
 
 jobs:
   docker:
     env:
-      IMAGE: ghcr.io/kingdonb/podinfo
+      IMAGE: ghcr.io/${{ github.actor }}/podinfo
     runs-on: ubuntu-latest
     steps:
       - name: Prepare
