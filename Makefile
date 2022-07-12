@@ -6,7 +6,10 @@ TAG?=latest
 NAME:=podinfo
 DOCKER_REPOSITORY:=stefanprodan
 DOCKER_IMAGE_NAME:=$(DOCKER_REPOSITORY)/$(NAME)
+GHCR_IMAGE_REPO:=$(shell yq .image.repository charts/podinfo/values.yaml)
 GIT_COMMIT:=$(shell git describe --dirty --always)
+GIT_SOURCE:=$(shell git config --get remote.origin.url)
+OCI_REVISION:=$(shell git branch --show-current)/$(shell git rev-parse HEAD)
 VERSION:=$(shell grep 'VERSION' pkg/version/version.go | awk '{ print $$4 }' | tr -d '"')
 EXTRA_RUN_ARGS?=
 
@@ -82,9 +85,30 @@ version-set:
 	/usr/bin/sed -i '' "s/$$current/$$next/g" cue/main.cue && \
 	echo "Version $$next set in code, deployment, chart and kustomize"
 
+image-set:
+	@next="$(REPO)" && \
+	current="$(GHCR_IMAGE_REPO)" && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" charts/podinfo/values.yaml && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" charts/podinfo/values-prod.yaml && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" cue/podinfo/config.cue && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" deploy/webapp/frontend/deployment.yaml && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" deploy/webapp/backend/deployment.yaml && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" deploy/bases/frontend/deployment.yaml && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" deploy/bases/backend/deployment.yaml && \
+	/usr/bin/sed -i '' "s|$$current|$$next|g" kustomize/deployment.yaml && \
+	echo "Image repo $$next set in deployment, chart and kustomize"
+
 release:
 	git tag $(VERSION)
 	git push origin $(VERSION)
+
+push-tag: version-set release
+
+push-config:
+	flux push artifact $(GHCR_IMAGE_REPO)/deploy:$(VERSION) \
+	  --path="./deploy" \
+	  --source="$(GIT_SOURCE)" \
+	  --revision="$(OCI_REVISION)"
 
 swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
