@@ -25,7 +25,7 @@ spec:
       serviceAccountName: webapp
       containers:
       - name: backend
-        image: ghcr.io/kingdonb/podinfo:6.1.14
+        image: ghcr.io/priyanka-ravi/podinfo:6.1.14
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
