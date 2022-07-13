@@ -8,7 +8,7 @@ backends: []
 
 image:
   repository: ghcr.io/kingdonb/podinfo
-  tag: 6.1.13
+  tag: 6.1.14
   pullPolicy: IfNotPresent
 
 ui:

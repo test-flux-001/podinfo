@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ghcr.io/kingdonb/podinfo:6.1.13
+        image: ghcr.io/kingdonb/podinfo:6.1.14
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
