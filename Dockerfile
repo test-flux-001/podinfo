@@ -6,9 +6,11 @@ RUN mkdir -p /podinfo/
 
 WORKDIR /podinfo
 
-COPY . .
+ADD go.mod go.sum .
 
 RUN go mod download
+
+COPY . .
 
 RUN CGO_ENABLED=0 go build -ldflags "-s -w \
     -X github.com/stefanprodan/podinfo/pkg/version.REVISION=${REVISION}" \
