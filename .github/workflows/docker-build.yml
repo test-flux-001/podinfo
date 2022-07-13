@@ -54,5 +54,11 @@ jobs:
             ${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
             ${{ env.IMAGE }}:${{ steps.prep.outputs.LATEST_ID }}            
 
+      - name: Build and push chart (OCI)
+        id: push_oci_chart
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        run: |
+          make push-chart
+
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

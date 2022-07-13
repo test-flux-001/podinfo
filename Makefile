@@ -110,6 +110,11 @@ push-config:
 	  --source="$(GIT_SOURCE)" \
 	  --revision="$(OCI_REVISION)"
 
+push-chart: build-charts
+	# helm lint charts/*
+	# helm package charts/*
+	helm push podinfo-$(VERSION).tgz oci://$(GHCR_IMAGE_REPO)/helm
+
 swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go get github.com/swaggo/swag/gen@latest
