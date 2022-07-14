@@ -3,7 +3,7 @@ name: Flux Push OCI Release
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
     tags:
       - 'release/*'
 
