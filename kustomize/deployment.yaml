@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: podinfod
-        image: ghcr.io/kingdonb/podinfo:6.1.15 # {"$imagepolicy": "podinfo:dev-latest"}
+        image: ghcr.io/kingdonb/podinfo:master-8ae3c8b1-1658262917 # {"$imagepolicy": "podinfo:dev-latest"}
         imagePullPolicy: IfNotPresent
         ports:
         - name: http

@@ -8,4 +8,4 @@ spec:
     spec:
       containers:
       - name: podinfo
-        image: ghcr.io/kingdonb/podinfo:0.5.17 # {"$imagepolicy": "river-auto:edge"}
+        image: ghcr.io/priyanka-ravi/podinfo:0.5.17 # {"$imagepolicy": "river-auto:edge"}

@@ -8,8 +8,8 @@ spec:
   gitImplementation: go-git
   interval: 30m0s
   ref:
-    branch: master
+    branch: dev
   secretRef:
     name: podinfo-rw
   timeout: 20s
-  url: ssh://git@github.com/kingdonb/podinfo
+  url: ssh://git@github.com/priyanka-ravi/podinfo

@@ -5,5 +5,5 @@ metadata:
   name: podinfo
   namespace: podinfo
 spec:
-  image: ghcr.io/kingdonb/podinfo
+  image: ghcr.io/priyanka-ravi/podinfo
   interval: 1m0s
