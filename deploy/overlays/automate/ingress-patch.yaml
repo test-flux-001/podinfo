@@ -3,11 +3,11 @@ kind: Ingress
 metadata:
   name: podinfo
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-production
+    # cert-manager.io/cluster-issuer: letsencrypt-production
 spec:
   ingressClassName: nginx
   rules:
-  - host: podinfo.demos.hephy.pro
+  - host: podinfo.local
     http:
       paths:
       - backend:
@@ -17,7 +17,7 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-  tls:
-  - hosts:
-    - podinfo.demos.hephy.pro
-    secretName: podinfo-stg-tls
+  # tls:
+  # - hosts:
+  #   - podinfo.demos.hephy.pro
+  #   secretName: podinfo-stg-tls
