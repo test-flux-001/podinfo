@@ -11,8 +11,8 @@ resources:
   - imageauto.yaml
   - podinfo-rw-gitrepo.yaml
 #  - _river-data-deployment.yaml
-#  - _ingress.yaml
+  - _ingress.yaml
 
-patchesStrategicMerge: []
+patchesStrategicMerge:
 #  - river-data-patch.yaml
-#  - ingress-patch.yaml
+  - ingress-patch.yaml
