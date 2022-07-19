@@ -1,0 +1,11 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: podinfo
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: podinfo
+        image: ghcr.io/kingdonb/podinfo:0.5.17 # {"$imagepolicy": "river-auto:edge"}

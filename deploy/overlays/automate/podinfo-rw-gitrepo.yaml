@@ -1,0 +1,15 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: podinfo-rw
+  namespace: podinfo
+spec:
+  gitImplementation: go-git
+  interval: 30m0s
+  ref:
+    branch: master
+  secretRef:
+    name: podinfo-rw
+  timeout: 20s
+  url: ssh://git@github.com/kingdonb/podinfo
