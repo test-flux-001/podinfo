@@ -8,7 +8,7 @@ spec:
   gitImplementation: go-git
   interval: 30m0s
   ref:
-    branch: master
+    branch: dev
   secretRef:
     name: podinfo-rw
   timeout: 20s
