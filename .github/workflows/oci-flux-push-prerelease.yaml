@@ -1,0 +1,94 @@
+name: Flux Push OCI Release
+
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'release/*'
+
+jobs:
+  flux:
+    env:
+      IMAGE: ghcr.io/${{ github.actor }}/podinfo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # - uses: actions/setup-go@v3
+      #   with:
+      #     go-version: '^1.17.0'
+
+      - name: Prepare
+        id: prep
+        run: |
+          GIT_TAG=${GITHUB_REF/refs\/tags\/release\//}
+          FLUX_PATH=${GITHUB_WORKSPACE}/bin
+          # FLUX_OCI_SHA=2b1cc62
+          # mkdir flux2 && pushd flux2
+          # git init
+          # git remote add origin https://github.com/fluxcd/flux2
+          git clone --depth 1 https://github.com/fluxcd/flux2 -b oci
+          # git fetch --depth 1 origin $FLUX_OCI_SHA
+          # git checkout FETCH_HEAD
+          pushd flux2
+          FLUX_OCI_SHA=$(git rev-parse --short HEAD)
+          popd
+          mkdir -p "${FLUX_PATH}"
+          echo "${FLUX_PATH}" >> $GITHUB_PATH
+          
+          echo ::set-output name=GIT_TAG::${GIT_TAG}
+          echo ::set-output name=FLUX_PATH::${FLUX_PATH}
+          echo ::set-output name=FLUX_OCI_SHA::${FLUX_OCI_SHA}
+
+      - name: Cache Flux OCI (prerelease)
+        id: cache-flux
+        uses: actions/cache@v3
+        env:
+          cache-name: flux
+        with:
+          path: ${{ steps.prep.outputs.FLUX_PATH }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ steps.prep.outputs.FLUX_OCI_SHA }}
+
+      # FIXME: it's not possible to fallback to download artifact from a recent
+      # version here, not sure how to write this into GHA but a cache miss at
+      # this junction is an error and should bail out
+      # (if cache is not populated at this point it logs into GHCR, then fails)
+
+      - name: Download latest OCI Flux
+        if: steps.cache-flux.outputs.cache-hit != 'true'
+        run: |
+          echo "ERROR: Flux CLI binary cannot be restored from cache"
+          echo " (hint: check out the 'Build Flux OCI Binary (Pre-release)' job which should "
+          echo "  have populated the cache, or just try pushing one more commit)"
+          exit 1
+
+      # - uses: actions/upload-artifact@v2
+      #   if: steps.cache-flux.outputs.cache-hit != 'true'
+      #   with:
+      #     name: flux-oci-bin-prerelease
+      #     path: ${{ steps.prep.outputs.FLUX_PATH }}/flux
+
+      # - name: Download latest OCI Flux
+      #   if: steps.cache-flux.outputs.cache-hit != 'true'
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: flux-oci-bin-prerelease
+      #     path: ${{ steps.prep.outputs.FLUX_PATH }}/flux
+
+      - name: Login to GHCR
+        uses: docker/login-action@v1
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Flux push OCI Repository
+        id: oci_push
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        run: |
+          flux push artifact oci://${{ env.IMAGE }}:${{ steps.prep.outputs.GIT_TAG }} \
+            --path="./deploy" \
+            --source="$(git config --get remote.origin.url)" \
+            --revision="$(git branch --show-current)/$(git rev-parse HEAD)"

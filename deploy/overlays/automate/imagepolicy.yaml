@@ -1,0 +1,15 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImagePolicy
+metadata:
+  name: dev-latest
+  namespace: podinfo
+spec:
+  imageRepositoryRef:
+    name: podinfo
+  filterTags:
+    pattern: '^.*-[a-fA-F0-9]+-(?P<ts>[1-9][0-9]+)'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
