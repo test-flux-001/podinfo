@@ -13,7 +13,7 @@ spec:
       author:
         email: yebyen+fluxcd@gmail.com
         name: fluxcdbot
-      messageTemplate: '{{range .Updated.Images}}{{println .}}{{end}}'
+      messageTemplate: '[ci skip] {{range .Updated.Images}}{{println .}}{{end}}'
     push:
       branch: master
   interval: 1m0s
