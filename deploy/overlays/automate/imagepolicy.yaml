@@ -8,7 +8,7 @@ spec:
   imageRepositoryRef:
     name: podinfo
   filterTags:
-    pattern: '^.*-[a-fA-F0-9]+-(?P<ts>.*)'
+    pattern: '^.*-[a-fA-F0-9]+-(?P<ts>[1-9][0-9]+)'
     extract: '$ts'
   policy:
     numerical:
