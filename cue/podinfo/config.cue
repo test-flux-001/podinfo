@@ -13,7 +13,7 @@ import (
 	serviceMonitor: #serviceMonConfig
 
 	image: {
-		repository: *"ghcr.io/priyanka-ravi/podinfo" | string
+		repository: *"ghcr.io/kingdonb/podinfo" | string
 		pullPolicy: *"IfNotPresent" | string
 		tag:        string
 	}
