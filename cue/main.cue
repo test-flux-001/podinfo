@@ -10,7 +10,7 @@ app: podinfo.#Application & {
 			name:      "podinfo"
 			namespace: "default"
 		}
-		image: tag: "6.1.17"
+		image: tag: "6.1.18"
 		resources: requests: {
 			cpu:    "100m"
 			memory: "16Mi"
