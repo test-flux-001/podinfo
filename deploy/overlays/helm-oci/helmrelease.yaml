@@ -5,6 +5,7 @@ metadata:
   name: podinfo
   namespace: podinfo
 spec:
+  targetNamespace: podinfo-helm-oci
   chart:
     spec:
       chart: podinfo
