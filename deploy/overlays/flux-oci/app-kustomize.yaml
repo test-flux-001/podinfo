@@ -8,6 +8,6 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: podinfo
-  path: ./production
+  path: ./deploy/overlays/production
   wait: true
   prune: true
