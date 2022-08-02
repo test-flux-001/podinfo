@@ -1,0 +1,4 @@
+resources:
+#  - ../automate
+  - app-kustomize.yaml
+  - ocirepository.yaml

@@ -1,0 +1,11 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: podinfo
+  namespace: podinfo
+spec:
+  interval: 1m0s
+  ref:
+    semver: '*'
+  url: oci://ghcr.io/kingdonb/podinfo/deploy
