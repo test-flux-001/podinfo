@@ -10,7 +10,7 @@ on:
 jobs:
   flux:
     env:
-      IMAGE: ghcr.io/${{ github.actor }}/podinfo
+      IMAGE: ghcr.io/${{ github.actor }}/podinfo/deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
