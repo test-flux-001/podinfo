@@ -5,6 +5,7 @@ metadata:
   namespace: podinfo
 spec:
   interval: 10m
+  targetNamespace: podinfo-flux-oci
   sourceRef:
     kind: OCIRepository
     name: podinfo
