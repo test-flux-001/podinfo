@@ -8,6 +8,6 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: podinfo
-  path: ./deploy/production
+  path: ./production
   wait: true
   prune: true
