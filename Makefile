@@ -101,6 +101,8 @@ image-set:
 release:
 	git tag $(VERSION)
 	git push origin $(VERSION)
+	git tag release/$(VERSION)
+	git push origin release/$(VERSION)
 
 push-tag: version-set release
 
