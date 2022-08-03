@@ -98,13 +98,17 @@ image-set:
 	/usr/bin/sed -i '' "s|$$current|$$next|g" kustomize/deployment.yaml && \
 	echo "Image repo $$next set in deployment, chart and kustomize"
 
-release:
+release-app:
 	git tag $(VERSION)
 	git push origin $(VERSION)
+
+release-oci:
 	git tag release/$(VERSION)
 	git push origin release/$(VERSION)
 
-push-tag: version-set release
+# Careful
+push-tag: version-set release-app
+	echo "Now go check on the build, and when it's finished run: make release-oci"
 
 push-config:
 	flux push artifact $(GHCR_IMAGE_REPO)/deploy:$(VERSION) \
