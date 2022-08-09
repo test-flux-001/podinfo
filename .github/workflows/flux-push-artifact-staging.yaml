@@ -1,0 +1,78 @@
+name: push-artifact-staging
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  packages: write # needed for ghcr.io access
+
+env:
+  OCI_REPO: "oci://ghcr.io/kingdonb/manifests/${{ github.event.repository.name }}"
+  #OCI_REPO: "oci://ghcr.io/my-org/manifests/${{ github.event.repository.name }}"
+
+jobs:
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Temporary shim until Flux's OCI Kustomize support is released:
+      - name: Prepare Flux CLI
+        id: prep
+        run: |
+          GIT_TAG=${GITHUB_REF/refs\/tags\/release\//}
+          FLUX_PATH=${GITHUB_WORKSPACE}/bin
+          # FLUX_OCI_SHA=d4c5a13
+          # mkdir flux2 && pushd flux2
+          # git init
+          # git remote add origin https://github.com/fluxcd/flux2
+          git clone --depth 1 https://github.com/fluxcd/flux2 -b oci
+          # git fetch --depth 1 origin $FLUX_OCI_SHA
+          # git checkout FETCH_HEAD
+          pushd flux2
+          FLUX_OCI_SHA=$(git rev-parse --short HEAD)
+          popd
+          mkdir -p "${FLUX_PATH}"
+          echo "${FLUX_PATH}" >> $GITHUB_PATH
+          
+          echo ::set-output name=GIT_TAG::${GIT_TAG}
+          echo ::set-output name=FLUX_PATH::${FLUX_PATH}
+          echo ::set-output name=FLUX_OCI_SHA::${FLUX_OCI_SHA}
+      - name: Cache Flux OCI (prerelease)
+        id: cache-flux
+        uses: actions/cache@v3
+        env:
+          cache-name: flux
+        with:
+          path: ${{ steps.prep.outputs.FLUX_PATH }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ steps.prep.outputs.FLUX_OCI_SHA }}
+      - name: Download latest OCI Flux
+        if: steps.cache-flux.outputs.cache-hit != 'true'
+        run: |
+          echo "ERROR: Flux CLI binary cannot be restored from cache"
+          echo " (hint: check out the 'Build Flux OCI Binary (Pre-release)' job which should "
+          echo "  have populated the cache, or just try pushing one more commit)"
+          exit 1
+
+      # Use instead after https://github.com/fluxcd/flux2/pull/2856 merges:
+      # - name: Setup Flux CLI
+      #   uses: fluxcd/flux2/action@main
+
+      # If you need manifest generation to run inside your CI pipeline
+      # (we don't need it here, but you might need this or similar):
+      # - name: Generate manifests
+      #   run: |
+      #     mkdir -p ./deploy/generated
+      #     kustomize build ./deploy/overlay/staging > ./deploy/generated/app.yaml
+
+      - name: Push manifests
+        run: |
+          flux push artifact $OCI_REPO:$(git rev-parse --short HEAD) \
+            --path="./deploy" \
+            --source="$(git config --get remote.origin.url)" \
+            --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
+      - name: Deploy manifests to staging
+        run: |
+          flux tag artifact $OCI_REPO:$(git rev-parse --short HEAD) --tag staging
