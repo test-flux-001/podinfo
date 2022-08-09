@@ -102,13 +102,13 @@ release-app:
 	git tag $(VERSION)
 	git push origin $(VERSION)
 
-release-oci:
-	git tag release/$(VERSION)
-	git push origin release/$(VERSION)
+# release-oci:
+# 	git tag release/$(VERSION)
+# 	git push origin release/$(VERSION)
 
 # Careful
 push-tag: version-set release-app
-	echo "Now go check on the build, and when it's finished run: make release-oci"
+	# echo "Now go check on the build, and when it's finished run: make release-oci"
 
 push-config:
 	flux push artifact $(GHCR_IMAGE_REPO)/deploy:$(VERSION) \
