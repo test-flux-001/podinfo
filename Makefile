@@ -98,7 +98,7 @@ image-set:
 	/usr/bin/sed -i '' "s|$$current|$$next|g" kustomize/deployment.yaml && \
 	echo "Image repo $$next set in deployment, chart and kustomize"
 
-release-app:
+release:
 	git tag $(VERSION)
 	git push origin $(VERSION)
 
@@ -106,8 +106,8 @@ release-app:
 # 	git tag release/$(VERSION)
 # 	git push origin release/$(VERSION)
 
-# Careful
-push-tag: version-set release-app
+# You need to set TAG here and pass it in, or it will default to 'latest'
+push-tag: version-set
 	# echo "Now go check on the build, and when it's finished run: make release-oci"
 
 push-config:
