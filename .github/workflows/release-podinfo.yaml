@@ -1,0 +1,117 @@
+name: Release Podinfo
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  docker:
+    env:
+      IMAGE: ghcr.io/${{ github.actor }}/podinfo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        id: prep
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          TS=$(date +%s)
+          REVISION=${GITHUB_SHA::8}
+          BUILD_ID="${BRANCH}-${REVISION}-${TS}"
+          LATEST_ID=canary
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            BUILD_ID=${GITHUB_REF/refs\/tags\//}
+            LATEST_ID=latest
+          fi
+          echo ::set-output name=BUILD_DATE::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=BUILD_ID::${BUILD_ID}
+          echo ::set-output name=LATEST_ID::${LATEST_ID}          
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v3
+
+      # Temporary shim until Flux's OCI Kustomize support is released:
+      - name: Prepare Flux CLI
+        id: prep_flux
+        run: |
+          GIT_TAG=${GITHUB_REF/refs\/tags\/release\//}
+          FLUX_PATH=${GITHUB_WORKSPACE}/bin
+          # FLUX_OCI_SHA=d4c5a13
+          # mkdir flux2 && pushd flux2
+          # git init
+          # git remote add origin https://github.com/fluxcd/flux2
+          git clone --depth 1 https://github.com/fluxcd/flux2 -b oci
+          # git fetch --depth 1 origin $FLUX_OCI_SHA
+          # git checkout FETCH_HEAD
+          pushd flux2
+          FLUX_OCI_SHA=$(git rev-parse --short HEAD)
+          popd
+          mkdir -p "${FLUX_PATH}"
+          echo "${FLUX_PATH}" >> $GITHUB_PATH
+          
+          echo ::set-output name=GIT_TAG::${GIT_TAG}
+          echo ::set-output name=FLUX_PATH::${FLUX_PATH}
+          echo ::set-output name=FLUX_OCI_SHA::${FLUX_OCI_SHA}
+      - name: Cache Flux OCI (prerelease)
+        id: cache-flux
+        uses: actions/cache@v3
+        env:
+          cache-name: flux
+        with:
+          path: ${{ steps.prep_flux.outputs.FLUX_PATH }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ steps.prep_flux.outputs.FLUX_OCI_SHA }}
+      - name: Download latest OCI Flux
+        if: steps.cache-flux.outputs.cache-hit != 'true'
+        run: |
+          echo "ERROR: Flux CLI binary cannot be restored from cache"
+          echo " (hint: check out the 'Build Flux OCI Binary (Pre-release)' job which should "
+          echo "  have populated the cache, or just try pushing one more commit)"
+          exit 1
+
+      # Use instead after https://github.com/fluxcd/flux2/pull/2856 merges:
+      # - name: Setup Flux CLI
+      #   uses: fluxcd/flux2/action@main
+
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
+            ${{ env.IMAGE }}:${{ steps.prep.outputs.LATEST_ID }}            
+          cache-from: type=registry,ref=ghcr.io/${{ github.actor }}/podinfo:canary
+          cache-to: type=inline
+
+      - name: App Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Build and push Helm chart (OCI)
+        id: push_oci_chart
+        run: |
+          make push-chart
+
+      - name: Push YAML manifests (OCI Flux)
+        run: |
+          flux push artifact $OCI_REPO:$(git tag --points-at HEAD) \
+            --path="./deploy" \
+            --source="$(git config --get remote.origin.url)" \
+            --revision="$(git tag --points-at HEAD)/$(git rev-parse HEAD)"
+
+      - name: Deploy manifests to production
+        run: |
+          flux tag artifact $OCI_REPO:$(git tag --points-at HEAD) --tag production
