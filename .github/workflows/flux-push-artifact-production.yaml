@@ -1,11 +1,15 @@
 name: push-artifact-production
+
 on:
   push:
     tags:
-      - '*'
+      - '42.0.xx' # set to unlikely tag so this will not be used, see
+        # 'release-podinfo.yaml' instead, which combines this and docker-build.
+
 env:
   OCI_REPO: "oci://ghcr.io/kingdonb/manifests/${{ github.event.repository.name }}"
   #OCI_REPO: "oci://ghcr.io/my-org/manifests/${{ github.event.repository.name }}"
+
 jobs:
   kubernetes:
     runs-on: ubuntu-latest
@@ -62,7 +66,7 @@ jobs:
       #     kustomize build ./deploy/overlay/staging > ./deploy/generated/app.yaml
 
       - name: Login to GHCR
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
