@@ -8,4 +8,4 @@ spec:
   interval: 1m0s
   ref:
     semver: '*'
-  url: oci://ghcr.io/kingdonb/podinfo/deploy
+  url: oci://ghcr.io/kingdonb/manifests/podinfo
