@@ -3,7 +3,7 @@ name: push-artifact-staging
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
 
 permissions:
   packages: write # needed for ghcr.io access
