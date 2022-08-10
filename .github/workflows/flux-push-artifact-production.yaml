@@ -5,6 +5,13 @@ on:
     tags:
       - '42.0.xx' # set to unlikely tag so this will not be used, see
         # 'release-podinfo.yaml' instead, which combines this and docker-build.
+        
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'release prefix'
+        default: 'rc'
+        required: true
 
 env:
   OCI_REPO: "oci://ghcr.io/kingdonb/manifests/${{ github.event.repository.name }}"
