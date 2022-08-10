@@ -81,10 +81,10 @@ jobs:
 
       - name: Push manifests
         run: |
-          flux push artifact $OCI_REPO:$(git tag --points-at HEAD) \
+          flux push artifact $OCI_REPO:v0.0.1 \
             --path="./deploy" \
             --source="$(git config --get remote.origin.url)" \
-            --revision="$(git tag --points-at HEAD)/$(git rev-parse HEAD)"
-      - name: Deploy manifests to production
-        run: |
-          flux tag artifact $OCI_REPO:$(git tag --points-at HEAD) --tag production
+            --revision="$(git branch --show-current/$(git rev-parse HEAD)"
+      # - name: Deploy manifests to production
+      # run: |
+      #   flux tag artifact $OCI_REPO:$(git tag --points-at HEAD) --tag production
