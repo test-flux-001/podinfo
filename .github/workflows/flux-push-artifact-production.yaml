@@ -14,7 +14,7 @@ on:
         required: true
 
 env:
-  OCI_REPO: "oci://ghcr.io/kingdonb/manifests/${{ github.event.repository.name }}"
+  OCI_REPO: "oci://ghcr.io/test-flux-001/manifests/${{ github.event.repository.name }}"
   #OCI_REPO: "oci://ghcr.io/my-org/manifests/${{ github.event.repository.name }}"
 
 jobs:
