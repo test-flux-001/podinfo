@@ -5,11 +5,18 @@ on:
     branches:
       - 'master'
 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'release prefix'
+        default: 'rc'
+        required: true
+        
 permissions:
   packages: write # needed for ghcr.io access
 
 env:
-  OCI_REPO: "oci://ghcr.io/kingdonb/manifests/${{ github.event.repository.name }}"
+  OCI_REPO: "oci://ghcr.io/test-flux-001/manifests/${{ github.event.repository.name }}"
   #OCI_REPO: "oci://ghcr.io/my-org/manifests/${{ github.event.repository.name }}"
 
 jobs:
@@ -80,6 +87,6 @@ jobs:
             --path="./deploy" \
             --source="$(git config --get remote.origin.url)" \
             --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
-      - name: Deploy manifests to staging
-        run: |
-          flux tag artifact $OCI_REPO:$(git rev-parse --short HEAD) --tag staging
+#       - name: Deploy manifests to staging
+#         run: |
+#           flux tag artifact $OCI_REPO:$(git rev-parse --short HEAD) --tag staging
